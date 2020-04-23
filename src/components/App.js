@@ -36,13 +36,13 @@ class App extends Component {
     if(networkData) {
       const marketplace = web3.eth.Contract(Marketplace.abi, networkData.address)
       this.setState({ marketplace })
-      const productCount = await marketplace.methods.productCount().call()
-      this.setState({ productCount })
-      // Load products
-      for (var i = 1; i <= productCount; i++) {
-        const product = await marketplace.methods.products(i).call()
+      const propertyCount = await marketplace.methods.propertyCount().call()
+      this.setState({ propertyCount })
+      // Load properties
+      for (var i = 1; i <= propertyCount; i++) {
+        const property = await marketplace.methods.properties(i).call()
         this.setState({
-          products: [...this.state.products, product]
+          properties: [...this.state.properties, property]
         })
       }
       this.setState({ loading: false})
@@ -55,26 +55,26 @@ class App extends Component {
     super(props)
     this.state = {
       account: '',
-      productCount: 0,
-      products: [],
+      propertyCount: 0,
+      properties: [],
       loading: true
     }
 
-    this.createProduct = this.createProduct.bind(this)
-    this.purchaseProduct = this.purchaseProduct.bind(this)
+    this.createProperty = this.createProperty.bind(this)
+    this.purchaseProperty = this.purchaseProperty.bind(this)
   }
 
-  createProduct(name, price) {
+  createProperty(name, price) {
     this.setState({ loading: true })
-    this.state.marketplace.methods.createProduct(name, price).send({ from: this.state.account })
+    this.state.marketplace.methods.createProperty(name, price).send({ from: this.state.account })
     .once('receipt', (receipt) => {
       this.setState({ loading: false })
     })
   }
 
-  purchaseProduct(id, price) {
+  purchaseProperty(id, price) {
     this.setState({ loading: true })
-    this.state.marketplace.methods.purchaseProduct(id).send({ from: this.state.account, value: price })
+    this.state.marketplace.methods.purchaseProperty(id).send({ from: this.state.account, value: price })
     .once('receipt', (receipt) => {
       this.setState({ loading: false })
     })
@@ -90,9 +90,9 @@ class App extends Component {
               { this.state.loading
                 ? <div id="loader" className="text-center"><p className="text-center">Loading...</p></div>
                 : <Main
-                  products={this.state.products}
-                  createProduct={this.createProduct}
-                  purchaseProduct={this.purchaseProduct} />
+                  properties={this.state.properties}
+                  createProperty={this.createProperty}
+                  purchaseProperty={this.purchaseProperty} />
               }
             </main>
           </div>
