@@ -3,11 +3,11 @@ pragma solidity ^0.5.0;
 contract Marketplace {
     string public name;
     uint public propertyCount = 0;
-    mapping(uint => Property) public propertys;
+    mapping(uint => Property) public properties;
 
     struct Property {
         uint id;
-        string name;
+        string streetAddress;
         uint price;
         address payable owner;
         bool purchased;
@@ -15,7 +15,7 @@ contract Marketplace {
 
     event PropertyCreated(
         uint id,
-        string name,
+        string streetAddress,
         uint price,
         address payable owner,
         bool purchased
@@ -23,32 +23,32 @@ contract Marketplace {
 
     event PropertyPurchased(
         uint id,
-        string name,
+        string streetAddress,
         uint price,
         address payable owner,
         bool purchased
     );
 
     constructor() public {
-        name = "Dapp University Marketplace";
+        name = "Real Estate Marketplace";
     }
 
-    function createProperty(string memory _name, uint _price) public {
-        // Require a valid name
-        require(bytes(_name).length > 0);
+    function createProperty(string memory _streetAddress, uint _price) public {
+        // Require a valid address
+        require(bytes(_streetAddress).length > 0);
         // Require a valid price
         require(_price > 0);
         // Increment property count
         propertyCount ++;
         // Create the property
-        propertys[propertyCount] = Property(propertyCount, _name, _price, msg.sender, false);
+        properties[propertyCount] = Property(propertyCount, _streetAddress, _price, msg.sender, false);
         // Trigger an event
-        emit PropertyCreated(propertyCount, _name, _price, msg.sender, false);
+        emit PropertyCreated(propertyCount, _streetAddress, _price, msg.sender, false);
     }
 
     function purchaseProperty(uint _id) public payable {
         // Fetch the property
-        Property memory _property = propertys[_id];
+        Property memory _property = properties[_id];
         // Fetch the owner
         address payable _seller = _property.owner;
         // Make sure the property has a valid id
@@ -64,10 +64,10 @@ contract Marketplace {
         // Mark as purchased
         _property.purchased = true;
         // Update the property
-        propertys[_id] = _property;
+        properties[_id] = _property;
         // Pay the seller by sending them Ether
         address(_seller).transfer(msg.value);
         // Trigger an event
-        emit PropertyPurchased(propertyCount, _property.name, _property.price, msg.sender, true);
+        emit PropertyPurchased(propertyCount, _property.streetAddress, _property.price, msg.sender, true);
     }
 }

@@ -22,56 +22,56 @@ contract('Marketplace', ([deployer, seller, buyer]) => {
 
     it('has a name', async () => {
       const name = await marketplace.name()
-      assert.equal(name, 'Dapp University Marketplace')
+      assert.equal(name, 'Real Estate Marketplace')
     })
   })
 
-  describe('products', async () => {
-    let result, productCount
+  describe('properties', async () => {
+    let result, propertyCount
 
     before(async () => {
-      result = await marketplace.createProduct('iPhone X', web3.utils.toWei('1', 'Ether'), { from: seller })
-      productCount = await marketplace.productCount()
+      result = await marketplace.createProperty('112 Main St', web3.utils.toWei('1', 'Ether'), { from: seller })
+      propertyCount = await marketplace.propertyCount()
     })
 
-    it('creates products', async () => {
+    it('creates properties', async () => {
       // SUCCESS
-      assert.equal(productCount, 1)
+      assert.equal(propertyCount, 1)
       const event = result.logs[0].args
-      assert.equal(event.id.toNumber(), productCount.toNumber(), 'id is correct')
-      assert.equal(event.name, 'iPhone X', 'name is correct')
+      assert.equal(event.id.toNumber(), propertyCount.toNumber(), 'id is correct')
+      assert.equal(event.streetAddress, '112 Main St', 'name is correct')
       assert.equal(event.price, '1000000000000000000', 'price is correct')
       assert.equal(event.owner, seller, 'owner is correct')
       assert.equal(event.purchased, false, 'purchased is correct')
 
       // FAILURE: Product must have a name
-      await await marketplace.createProduct('', web3.utils.toWei('1', 'Ether'), { from: seller }).should.be.rejected;
+      await await marketplace.createProperty('', web3.utils.toWei('1', 'Ether'), { from: seller }).should.be.rejected;
       // FAILURE: Product must have a price
-      await await marketplace.createProduct('iPhone X', 0, { from: seller }).should.be.rejected;
+      await await marketplace.createProperty('112 Main St', 0, { from: seller }).should.be.rejected;
     })
 
-    it('lists products', async () => {
-      const product = await marketplace.products(productCount)
-      assert.equal(product.id.toNumber(), productCount.toNumber(), 'id is correct')
-      assert.equal(product.name, 'iPhone X', 'name is correct')
-      assert.equal(product.price, '1000000000000000000', 'price is correct')
-      assert.equal(product.owner, seller, 'owner is correct')
-      assert.equal(product.purchased, false, 'purchased is correct')
+    it('lists properties', async () => {
+      const property = await marketplace.properties(propertyCount)
+      assert.equal(property.id.toNumber(), propertyCount.toNumber(), 'id is correct')
+      assert.equal(property.streetAddress, '112 Main St', 'name is correct')
+      assert.equal(property.price, '1000000000000000000', 'price is correct')
+      assert.equal(property.owner, seller, 'owner is correct')
+      assert.equal(property.purchased, false, 'purchased is correct')
     })
 
-    it('sells products', async () => {
+    it('sells properties', async () => {
       // Track the seller balance before purchase
       let oldSellerBalance
       oldSellerBalance = await web3.eth.getBalance(seller)
       oldSellerBalance = new web3.utils.BN(oldSellerBalance)
 
       // SUCCESS: Buyer makes purchase
-      result = await marketplace.purchaseProduct(productCount, { from: buyer, value: web3.utils.toWei('1', 'Ether')})
+      result = await marketplace.purchaseProperty(propertyCount, { from: buyer, value: web3.utils.toWei('1', 'Ether')})
 
       // Check logs
       const event = result.logs[0].args
-      assert.equal(event.id.toNumber(), productCount.toNumber(), 'id is correct')
-      assert.equal(event.name, 'iPhone X', 'name is correct')
+      assert.equal(event.id.toNumber(), propertyCount.toNumber(), 'id is correct')
+      assert.equal(event.streetAddress, '112 Main St', 'name is correct')
       assert.equal(event.price, '1000000000000000000', 'price is correct')
       assert.equal(event.owner, buyer, 'owner is correct')
       assert.equal(event.purchased, true, 'purchased is correct')
@@ -90,13 +90,13 @@ contract('Marketplace', ([deployer, seller, buyer]) => {
       assert.equal(newSellerBalance.toString(), exepectedBalance.toString())
 
       // FAILURE: Tries to buy a product that does not exist, i.e., product must have valid id
-      await marketplace.purchaseProduct(99, { from: buyer, value: web3.utils.toWei('1', 'Ether')}).should.be.rejected;      // FAILURE: Buyer tries to buy without enough ether
+      await marketplace.purchaseProperty(99, { from: buyer, value: web3.utils.toWei('1', 'Ether')}).should.be.rejected;      // FAILURE: Buyer tries to buy without enough ether
       // FAILURE: Buyer tries to buy without enough ether
-      await marketplace.purchaseProduct(productCount, { from: buyer, value: web3.utils.toWei('0.5', 'Ether') }).should.be.rejected;
+      await marketplace.purchaseProperty(propertyCount, { from: buyer, value: web3.utils.toWei('0.5', 'Ether') }).should.be.rejected;
       // FAILURE: Deployer tries to buy the product, i.e., product can't be purchased twice
-      await marketplace.purchaseProduct(productCount, { from: deployer, value: web3.utils.toWei('1', 'Ether') }).should.be.rejected;
+      await marketplace.purchaseProperty(propertyCount, { from: deployer, value: web3.utils.toWei('1', 'Ether') }).should.be.rejected;
       // FAILURE: Buyer tries to buy again, i.e., buyer can't be the seller
-      await marketplace.purchaseProduct(productCount, { from: buyer, value: web3.utils.toWei('1', 'Ether') }).should.be.rejected;
+      await marketplace.purchaseProperty(propertyCount, { from: buyer, value: web3.utils.toWei('1', 'Ether') }).should.be.rejected;
     })
 
   })
